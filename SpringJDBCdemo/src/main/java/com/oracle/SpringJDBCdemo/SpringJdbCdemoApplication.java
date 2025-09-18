@@ -5,6 +5,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
+import java.util.Scanner;
+
 @SpringBootApplication
 public class SpringJdbCdemoApplication {
 
@@ -20,6 +22,20 @@ public class SpringJdbCdemoApplication {
         repo.save(alien1);
 
         System.out.println(repo.findAll());
+
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter an alien's ID: ");
+        int alienID = Integer.parseInt(sc.nextLine());
+        System.out.print("Enter an alien's name: ");
+        String alienName =  sc.nextLine();
+        System.out.print("Enter an alien's email: ");
+        String alienEmail =  sc.nextLine();
+        alien1.setId(alienID);
+        alien1.setName(alienName);
+        alien1.setEmail(alienEmail);
+        repo.save(alien1);
+        System.out.println(repo.findAll());
+
 	}
 
 }
