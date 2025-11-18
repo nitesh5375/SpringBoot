@@ -1,0 +1,16 @@
+#GET http://localhost:8080/hello
+
+#GET http://localhost:8080/hello/Nitesh
+
+
+#POST http://localhost:8080/greet
+#Content-Type: application/json
+#
+#{
+#  "name": "Sitesh Singh",
+#  "age": 25
+#}
+
+GET http://localhost:8080/users
+
+

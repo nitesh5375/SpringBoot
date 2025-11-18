@@ -1,4 +1,4 @@
-package com.oracle.SpringJDBCdemo.model;
+package com.self.SpringJDBCdemo.model;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
