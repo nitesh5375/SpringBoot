@@ -1,16 +1,31 @@
-#GET http://localhost:8080/hello
+GET http://localhost:8080/hello
+###
+GET http://localhost:8080/hello/Nitesh
 
-#GET http://localhost:8080/hello/Nitesh
+###
+POST http://localhost:8080/greet
+Content-Type: application/json
 
-
-#POST http://localhost:8080/greet
-#Content-Type: application/json
-#
-#{
-#  "name": "Sitesh Singh",
-#  "age": 25
-#}
-
+{
+  "name": "Sitesh Singh",
+  "age": 25
+}
+###
 GET http://localhost:8080/users
 
+
+###
+GET http://localhost:8080/users/2
+
+###
+PUT http://localhost:8080/users/1
+Content-Type: application/json
+
+{
+  "name": "UpdatedName",
+  "age": 30
+}
+
+###
+DELETE http://localhost:8080/users/1
 

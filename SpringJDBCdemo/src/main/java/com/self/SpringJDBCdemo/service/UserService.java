@@ -24,4 +24,17 @@ public class UserService {
     public List<Users> fetchAllUsers() {
         return userRepository.fetchAllUsers();
     }
+
+    public Users fetchUserById(int id) {
+        return userRepository.fetchUserById(id) == null ? null : userRepository.fetchUserById(id);
+    }
+
+
+    public String updateUser(int id, Users data) {
+        return (int)userRepository.updateUser(id,data) == 1? "Row updated successfully" : "User not found";
+    }
+
+    public String deleteUser(int id) {
+        return (int) userRepository.deleteUser(id) == 1 ? "id -" + id + " deleted successfully" : "user not found";
+    }
 }

@@ -43,4 +43,19 @@ UserService userService;
     List<Users> fetchAllUsers(){
         return userService.fetchAllUsers();
     }
+
+    @GetMapping("/users/{id}")
+    Object fetchUserByid(@PathVariable int id){
+        return userService.fetchUserById(id);
+    }
+
+    @PutMapping("/users/{id}")
+    String updateUser(@RequestBody Users data,@PathVariable int id){
+        return userService.updateUser(id,data);
+    }
+
+    @DeleteMapping("/users/{id}")
+    String deleteUser(@PathVariable int id){
+        return userService.deleteUser(id);
+    }
 }

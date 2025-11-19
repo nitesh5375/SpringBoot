@@ -3,6 +3,7 @@ package com.self.SpringJDBCdemo.repository;
 
 import com.self.SpringJDBCdemo.model.Users;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -33,5 +34,34 @@ public class UserRepository {
             user.setAge(rs.getInt("age"));
             return user;
         });
+    }
+
+    public Users fetchUserById(int id) {
+
+        String sql = "select * from users where id = ?";
+
+        try {
+            return template.queryForObject(sql, (rs, rowNum) -> {
+                Users user = new Users();
+                user.setId(rs.getInt("id"));
+                user.setName(rs.getString("name"));
+                user.setAge(rs.getInt("age"));
+                return user;
+            },id);
+        }
+        catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+
+    public Object updateUser(int id, Users data) {
+        String sql = "update users set name = ?, age = ? where id = ?";
+        return template.update(sql,data.getName(),data.getAge(),id);
+    }
+
+    public Object deleteUser(int id) {
+        String sql = "delete from users where id = ?";
+        return template.update(sql,id);
     }
 }
