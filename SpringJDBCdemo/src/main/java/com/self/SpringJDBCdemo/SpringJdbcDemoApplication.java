@@ -7,6 +7,11 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.Scanner;
 
+//Annotations in Java:
+//Do NOT guarantee order
+//Are NOT evaluated top-to-bottom
+//Are NOT executed in the order they appear in your code
+
 @SpringBootApplication
 public class SpringJdbcDemoApplication {
 

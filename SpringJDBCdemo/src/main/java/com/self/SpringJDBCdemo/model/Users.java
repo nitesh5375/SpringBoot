@@ -1,8 +1,6 @@
 package com.self.SpringJDBCdemo.model;
 
-public class Users {
-
-
+ public class Users {
 
     int id;
     String name;

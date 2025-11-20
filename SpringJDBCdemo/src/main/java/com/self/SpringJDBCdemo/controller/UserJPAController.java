@@ -1,8 +1,10 @@
 package com.self.SpringJDBCdemo.controller;
 
 
+import com.self.SpringJDBCdemo.exception.UserNotFoundException;
 import com.self.SpringJDBCdemo.model.UserJPA;
 import com.self.SpringJDBCdemo.service.UserJPAService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +17,7 @@ public class UserJPAController {
     UserJPAService userJPAService;
 
     @PostMapping("/userJPA")
-    public UserJPA createUserJPA(@RequestBody UserJPA data){
+    public UserJPA createUserJPA(@Valid @RequestBody UserJPA data) throws UserNotFoundException {
         return userJPAService.createUser(data);
     }
 
@@ -30,7 +32,7 @@ public class UserJPAController {
     }
 
     @PutMapping("/userJPA/{id}")
-    public String updateUserJPA(@RequestBody UserJPA data, @PathVariable int id){
+    public String updateUserJPA(@Valid @RequestBody UserJPA data, @PathVariable int id){
         return userJPAService.updateUser(id,data);
     }
 

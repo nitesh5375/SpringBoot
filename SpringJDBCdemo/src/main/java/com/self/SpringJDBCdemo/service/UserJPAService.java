@@ -1,6 +1,7 @@
 package com.self.SpringJDBCdemo.service;
 
 
+import com.self.SpringJDBCdemo.exception.UserNotFoundException;
 import com.self.SpringJDBCdemo.model.UserJPA;
 import com.self.SpringJDBCdemo.repository.UserJPARepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class UserJPAService {
     }
 
     public UserJPA findUserById(int id){
-        return userJPARepository.findById(id).orElse(null);
+        return userJPARepository.findById(id).orElseThrow(() -> new UserNotFoundException("No record found with id " + id));
     }
 
     public String updateUser(int id, UserJPA data){
@@ -33,13 +34,13 @@ public class UserJPAService {
             return "user updated successfully";
         }
         else {
-            return "User not found";
+            throw new UserNotFoundException("Update command failed");
         }
     }
 
     public String deleteUser(int id) {
         if(!userJPARepository.existsById(id)) {
-            return "User not found";
+            throw new UserNotFoundException("Delete command failed");
         }
         userJPARepository.deleteById(id);
         return "User deleted successfully";
