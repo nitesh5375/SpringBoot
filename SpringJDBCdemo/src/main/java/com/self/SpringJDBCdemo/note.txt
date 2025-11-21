@@ -1,0 +1,47 @@
+What is a Spring Bean? (Simple Explanation)
+
+A bean is just an object, but…
+
+👉 its lifecycle is managed by Spring, not by you.
+
+You normally create objects like:
+
+ModelMapper mapper = new ModelMapper();
+
+
+But when we say:
+
+Spring creates it
+
+Spring manages it
+
+Spring injects it
+
+Then that object becomes a Spring Bean.
+
+⭐ So a bean is simply:
+✔ An object created by Spring (not by new())
+✔ Registered inside Spring container
+✔ Reused anywhere using @Autowired
+✔ Singleton by default
+✔ Controlled entirely by Spring
+⭐ But where do beans come from?
+
+They come from:
+
+1️⃣ Classes annotated with @Component, @Repository, @Service, @Controller, etc.
+
+These get auto-detected.
+
+2️⃣ Methods annotated with @Bean inside a @Configuration class
+
+These are manually created beans (like ModelMapper).
+
+
+
+<----------------------------------------------------------------------------------------------------->
+
+Inversion of Control (IoC) is a fundamental design principle in software engineering, where the control over the flow of a program or the creation/management of objects is inverted from the custom user code to a framework or container.
+
+<----------------------------------------------------------------------------------------------------->
+

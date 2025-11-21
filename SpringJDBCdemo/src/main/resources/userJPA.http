@@ -15,10 +15,10 @@ GET http://localhost:8080/userJPA
 
 
 ###
-GET http://localhost:8080/userJPA/23
+GET http://localhost:8080/userJPA/77
 
 ###
-PUT http://localhost:8080/userJPA/2
+PUT http://localhost:8080/userJPA/7
 Content-Type: application/json
 
 {
@@ -27,5 +27,5 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:8080/users/2
+DELETE http://localhost:8080/userJPA/5
 
