@@ -1,0 +1,8 @@
+POST http://localhost:8080/user/6/orders
+#Content-Type: text/plain
+
+First Order
+###
+PUT http://localhost:8080/user/2/update
+
+2nd order

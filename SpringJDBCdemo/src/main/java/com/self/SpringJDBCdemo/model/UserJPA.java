@@ -3,6 +3,9 @@ package com.self.SpringJDBCdemo.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "users")
 public class UserJPA {
@@ -12,12 +15,12 @@ public class UserJPA {
     private int id;
 
 //    @NotNull(message = "Name can not be empty")       //NotNull is fine but it accepts ""  value which is not desired.
-    @NotEmpty(message = "Name can not be empty")
-        @Size(min =1, max =50, message = "Name must be between 1 to 50 characters")
+//    @NotEmpty(message = "Name can not be empty")
+//        @Size(min =1, max =50, message = "Name must be between 1 to 50 characters")
     private String name;
 
-    @Min(value =18, message = "user must be above 18")
-    @Max(value = 60, message = "User must be below 60")
+//    @Min(value =18, message = "user must be above 18")
+//    @Max(value = 60, message = "User must be below 60")
     private int age;
 
 
@@ -45,4 +48,14 @@ public class UserJPA {
         this.age = age;
     }
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Order> orders =  new ArrayList<>();
+
+    public List<Order> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<Order> users) {
+        this.orders = users;
+    }
 }

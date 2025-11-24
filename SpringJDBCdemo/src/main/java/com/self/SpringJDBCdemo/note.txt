@@ -23,7 +23,7 @@ Then that object becomes a Spring Bean.
 ✔ An object created by Spring (not by new())
 ✔ Registered inside Spring container
 ✔ Reused anywhere using @Autowired
-✔ Singleton by default
+✔ Singleton by default  meaning only one object is created of a class.
 ✔ Controlled entirely by Spring
 ⭐ But where do beans come from?
 

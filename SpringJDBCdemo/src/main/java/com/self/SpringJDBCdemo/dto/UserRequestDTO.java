@@ -1,14 +1,12 @@
 package com.self.SpringJDBCdemo.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public class UserRequestDTO {
 
-    @NotBlank(message = "Name can't be empty")
-    @Size(min=1,max=50, message = "size between 1 to 50")
+    //    @NotNull(message = "Name can not be empty")       //NotNull is fine, but it accepts ""  value which is not desired.
+    @NotBlank(message = "Name cannot be empty")
+    @Size(max = 50, message = "Name must be at most 50 characters")
     private String name;
 
     @Min(value = 18, message = "User must be at least 18 years old")
