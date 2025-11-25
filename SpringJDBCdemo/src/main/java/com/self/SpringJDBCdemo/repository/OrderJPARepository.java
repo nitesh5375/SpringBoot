@@ -1,7 +1,7 @@
 package com.self.SpringJDBCdemo.repository;
 
-import com.self.SpringJDBCdemo.model.Order;
+import com.self.SpringJDBCdemo.model.OrderJPA;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface OrderJPARepository extends JpaRepository<Order,Integer> {
+public interface OrderJPARepository extends JpaRepository<OrderJPA,Integer> {
 }

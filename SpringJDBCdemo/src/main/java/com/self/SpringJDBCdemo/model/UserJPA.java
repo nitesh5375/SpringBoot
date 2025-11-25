@@ -1,7 +1,6 @@
 package com.self.SpringJDBCdemo.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,13 +48,13 @@ public class UserJPA {
     }
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Order> orders =  new ArrayList<>();
+    private List<OrderJPA> orders =  new ArrayList<>();
 
-    public List<Order> getOrders() {
+    public List<OrderJPA> getOrders() {
         return orders;
     }
 
-    public void setOrders(List<Order> users) {
+    public void setOrders(List<OrderJPA> users) {
         this.orders = users;
     }
 }
