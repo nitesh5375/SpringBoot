@@ -29,3 +29,7 @@ Content-Type: application/json
 ###
 DELETE http://localhost:8080/users/1
 
+###
+GET GET /users/6/orders
+
+

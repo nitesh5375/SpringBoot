@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 
 @Entity
+@Table(name = "order_item")
 public class OrderItemJPA {
 
     @Id
@@ -15,7 +16,7 @@ public class OrderItemJPA {
     private Double price;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id") // creating a column in order_item table
     private OrderJPA order;
 
     public Integer getId() {

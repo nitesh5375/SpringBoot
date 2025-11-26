@@ -7,4 +7,20 @@ Content-Type: application/json
   "description": "First Order"
 }
 
+###
+POST http://localhost:8080/order/1/items
+Content-Type: application/json
+Accept: application/json
+
+{
+  "productName": "Case",
+  "quantity": 1,
+  "price": 1999.00
+}
+###
+GET http://localhost:8080/order/1
+
+
+
+
 

@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class OrderJPAController {
 
@@ -19,20 +21,27 @@ public class OrderJPAController {
 
 
 
-    @PostMapping("/{orderId}/items")
+    @PostMapping("/order/{orderId}/items")
     public OrderItemDTO addItem(@PathVariable int orderId,
                                 @RequestBody @Valid AddItemRequestDTO req){
         return orderService.addItem(orderId, req);
     }
 
-    @GetMapping("/{orderId}")
+    @GetMapping("/order/{orderId}")
     public OrderResponseDTO getOrder(@PathVariable int orderId){
         return orderService.getOrderWithItems(orderId);
     }
+
 
     @PostMapping("/order/user/{user_id}")
     public OrderResponseDTO createOrder(@PathVariable int user_id, @RequestBody @Valid OrderRequestDTO request){
         return orderService.createOrder(user_id, request);
     }
+
+    @GetMapping("/user/{userId}/orders")
+    public List<OrderResponseDTO> getUserOrders(@PathVariable int userId){
+        return orderService.getOrdersByUser(userId);
+    }
+
 
 }

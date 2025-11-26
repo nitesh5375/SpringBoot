@@ -22,20 +22,20 @@ public class UserJPAController {
     @Autowired
     UserJPAService userJPAService;
 
-
-    @PostMapping("/userJPA")
-    public UserResponseDTO createUserJPA(@Valid @RequestBody UserRequestDTO data) throws UserNotFoundException {
-        return userJPAService.createUser(data);
-    }
-
     @GetMapping("/userJPA")
     public List<UserResponseDTO> getAllUserJPA(){
         return userJPAService.fetchAllUser();
     }
 
     @GetMapping("/userJPA/{id}")
-    public UserResponseDTO getAllUserJPA(@PathVariable int id){
+    public UserResponseDTO getUserJPAByID(@PathVariable int id){
+
         return userJPAService.findUserById(id);
+    }
+
+    @PostMapping("/userJPA")
+    public UserResponseDTO createUserJPA(@Valid @RequestBody UserRequestDTO data) throws UserNotFoundException {
+        return userJPAService.createUser(data);
     }
 
     @PutMapping("/userJPA/{id}")
@@ -47,6 +47,8 @@ public class UserJPAController {
     public UserResponseDTO deleteUserJPA(@PathVariable int id){
         return userJPAService.deleteUser(id);
     }
+
+
 
 
 //    @PostMapping("/userJPA")

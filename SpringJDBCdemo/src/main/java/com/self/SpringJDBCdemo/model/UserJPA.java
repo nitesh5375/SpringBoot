@@ -9,8 +9,11 @@ import java.util.List;
 @Table(name = "users")
 public class UserJPA {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id         // This annotations indicates to hibernate that it is a primary key
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  //@GeneratedValue means “Do NOT expect the application to set the id. Generate it automatically.”
+    //IDENTITY means:
+    //✔ The database generates the primary key
+    //✔ Using AUTO_INCREMENT
     private int id;
 
 //    @NotNull(message = "Name can not be empty")       //NotNull is fine but it accepts ""  value which is not desired.
@@ -22,6 +25,18 @@ public class UserJPA {
 //    @Max(value = 60, message = "User must be below 60")
     private int age;
 
+    @OneToMany(mappedBy = "user", //It tells Hibernate that the foreign key for this relationship is NOT in this entity (UserJPA), but in the child entity (OrderJPA) inside the field named 'user'.
+            cascade = CascadeType.ALL,  //cascade = CascadeType.ALL tells Hibernate: “Whenever you perform an operation on the parent, automatically apply the same operation to the children.”
+            fetch = FetchType.LAZY)  //user = { id=1, name="Alex", age=25 }
+                                    // orders = LAZY proxy (empty placeholder)
+
+    private List<OrderJPA> orders =  new ArrayList<>();
+    //The list exists only in memory, not in the database.
+    //Its purpose is to allow:
+    //✔ Easy navigation from parent → children
+    //✔ Easy JSON creation (for REST APIs)
+    //✔ Easy cascade save/update/delete
+    //✔ Easy business logic operations
 
     public String getName() {
         return name;
@@ -47,13 +62,13 @@ public class UserJPA {
         this.age = age;
     }
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<OrderJPA> orders =  new ArrayList<>();
-
+//When building REST API responses (DTO mapping, JSON conversion), Then Jackson or ModelMapper will call: user.getOrders()
+    //getOrders() is the ONLY way Hibernate, Jackson, ModelMapper, and your own code can read the child collection of a User
     public List<OrderJPA> getOrders() {
         return orders;
     }
 
+    // it is used when automatic cascading has to happen like insert, update, delete
     public void setOrders(List<OrderJPA> users) {
         this.orders = users;
     }

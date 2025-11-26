@@ -7,7 +7,7 @@ POST http://localhost:8080/userJPA
 Content-Type: application/json
 
 {
-  "name": "Shashwat Verma",
+  "name": "Ram Verma",
   "age": 25
 }
 ###
@@ -15,17 +15,23 @@ GET http://localhost:8080/userJPA
 
 
 ###
-GET http://localhost:8080/userJPA/77
+GET http://localhost:8080/userJPA/3
 
 ###
-PUT http://localhost:8080/userJPA/7
+PUT http://localhost:8080/userJPA/3
 Content-Type: application/json
 
 {
-  "name": "UpdatedName",
+  "name": "Nitesh Singh",
   "age": 30
 }
 
 ###
-DELETE http://localhost:8080/userJPA/5
+POST http://localhost:8080/order/user/3
+Content-Type: application/json
+
+{
+  "description": "third Order"
+}
+
 

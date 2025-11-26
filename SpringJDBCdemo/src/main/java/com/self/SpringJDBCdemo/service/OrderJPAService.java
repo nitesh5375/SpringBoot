@@ -16,6 +16,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -72,5 +73,12 @@ public class OrderJPAService {
                 .collect(Collectors.toList()));
         dto.setUserId(order.getUser().getId());
         return dto;
+    }
+
+    public List<OrderResponseDTO> getOrdersByUser(int userId) {
+        return orderRepo.findByUserId(userId)
+                .stream()
+                .map(order -> modelMapper.map(order, OrderResponseDTO.class))
+                .toList();
     }
 }
