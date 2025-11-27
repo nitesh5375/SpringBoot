@@ -6,11 +6,15 @@ import com.self.SpringJDBCdemo.dto.UserResponseDTO;
 import com.self.SpringJDBCdemo.exception.UserNotFoundException;
 import com.self.SpringJDBCdemo.model.UserJPA;
 import com.self.SpringJDBCdemo.repository.UserJPARepository;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserJPAService {
@@ -50,6 +54,39 @@ public class UserJPAService {
        userJPARepository.deleteById(id);
 
        return modelMapper.map(entity, UserResponseDTO.class);
+    }
+
+    public UserResponseDTO searchUser(String name) {
+        UserJPA result = userJPARepository.findByName(name).orElseThrow(() -> new UserNotFoundException("No record found with name " + name));
+
+        return modelMapper.map(result, UserResponseDTO.class);
+    }
+
+    public UserResponseDTO searchUserContainingName(@Valid String name) {
+        UserJPA users = userJPARepository.findByNameContaining(name).orElseThrow(() -> new UserNotFoundException("No record found with name " + name));
+
+        return modelMapper.map(users, UserResponseDTO.class);
+    }
+
+    public List<UserResponseDTO> findByAgeBetween(int start, int end) {
+
+        List<UserJPA> users = userJPARepository.findByAgeBetween(start, end);
+
+        if (users.isEmpty()) {
+            throw new UserNotFoundException("No users found between age " + start + " and " + end);
+        }
+
+        return users.stream()
+                .map(u -> modelMapper.map(u, UserResponseDTO.class))
+                .toList();
+    }
+
+    public List<UserResponseDTO> ageGreaterThan(int age){
+        List<UserJPA> users = userJPARepository.findByAgeGreaterThan(age);
+        if(users == null){
+            throw new UserNotFoundException("No users found above age " + age);
+        }
+        return users.stream().map(user -> modelMapper.map(user, UserResponseDTO.class)).toList();
     }
 
 

@@ -8,12 +8,18 @@ import com.self.SpringJDBCdemo.exception.IdNotFoundException;
 import com.self.SpringJDBCdemo.exception.UserNotFoundException;
 import com.self.SpringJDBCdemo.model.OrderItemJPA;
 import com.self.SpringJDBCdemo.model.OrderJPA;
+import com.self.SpringJDBCdemo.model.Product;
 import com.self.SpringJDBCdemo.model.UserJPA;
 import com.self.SpringJDBCdemo.repository.OrderItemRepository;
 import com.self.SpringJDBCdemo.repository.OrderJPARepository;
+import com.self.SpringJDBCdemo.repository.ProductRepository;
 import com.self.SpringJDBCdemo.repository.UserJPARepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +32,7 @@ public class OrderJPAService {
     @Autowired private UserJPARepository userRepo;
     @Autowired private OrderItemRepository itemRepo;
     @Autowired private ModelMapper modelMapper;
+    @Autowired private ProductRepository productRepo;
 
     public OrderResponseDTO createOrder(int userId, OrderRequestDTO request){
         UserJPA user = userRepo.findById(userId)
@@ -75,10 +82,24 @@ public class OrderJPAService {
         return dto;
     }
 
-    public List<OrderResponseDTO> getOrdersByUser(int userId) {
-        return orderRepo.findByUserId(userId)
-                .stream()
-                .map(order -> modelMapper.map(order, OrderResponseDTO.class))
-                .toList();
+    public Page<OrderResponseDTO> getOrdersByUser(int userId, int page, int size, String sortBy) {
+        Pageable pageable = (Pageable) PageRequest.of(page, size, Sort.by(sortBy));
+        Page<OrderJPA> result = (Page<OrderJPA>) orderRepo.findByUserId(userId, pageable);
+
+        return result.map(it -> modelMapper.map(it, OrderResponseDTO.class));
     }
+
+    public OrderResponseDTO addProductToOrder(int orderId, int productId){
+        OrderJPA order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new IdNotFoundException("Order id not found"));
+
+        Product product = productRepo.findById(productId).orElseThrow(() -> new IdNotFoundException("Product id not found"));
+
+        order.getProducts().add(product);       // since getProducts() returns a List, we can perform add operation on it.
+        orderRepo.save(order);
+
+        return modelMapper.map(order, OrderResponseDTO.class);
+    }
+
+
 }

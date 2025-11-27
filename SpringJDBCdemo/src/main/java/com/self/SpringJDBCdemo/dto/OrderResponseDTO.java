@@ -7,7 +7,16 @@ public class OrderResponseDTO {
     private String description;
     private List<OrderItemDTO> items;
     private Integer userId; // optionally user basic info
+    private List<ProductDTO> products;
     // getters/setters
+
+    public List<ProductDTO> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<ProductDTO> products) {
+        this.products = products;
+    }
 
     public Integer getId() {
         return id;

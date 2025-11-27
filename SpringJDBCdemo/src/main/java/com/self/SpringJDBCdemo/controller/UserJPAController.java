@@ -49,7 +49,26 @@ public class UserJPAController {
     }
 
 
+    @GetMapping("/users/search")
+    public UserResponseDTO searchUserJPA(@Valid @RequestParam(name = "name") String name){
+        return userJPAService.searchUser(name);
+    }
 
+
+    @GetMapping("/users/searchNameContaining")
+    public UserResponseDTO searchUserNameJPA(@Valid @RequestParam(name = "name") String name){
+        return userJPAService.searchUserContainingName(name);
+    }
+
+    @GetMapping("users/searchByAge")
+    public List<UserResponseDTO> searchbyAgeBetween(@Valid @RequestParam int minAge, @Valid @RequestParam int maxAge){
+        return userJPAService.findByAgeBetween(minAge,maxAge);
+    }
+
+    @GetMapping("/users/searchAboveAge")
+    public List<UserResponseDTO> searchAboveAge(@Valid @RequestParam(name = "age") int ageLimit){
+        return userJPAService.ageGreaterThan(ageLimit);
+    }
 
 //    @PostMapping("/userJPA")
 //    public UserJPA createUserJPA(@Valid @RequestBody UserJPA data) throws UserNotFoundException {

@@ -34,4 +34,18 @@ Content-Type: application/json
   "description": "third Order"
 }
 
+###
+GET http://localhost:8080/users/search?name=Nitesh Singh
+
+
+###
+GET http://localhost:8080/users/searchNameContaining?name=Singh
+
+###
+GET http://localhost:8080/users/searchByAge?minAge=18&maxAge=30
+
+###
+GET http://localhost:8080/users/searchAboveAge?age=20
+
+
 

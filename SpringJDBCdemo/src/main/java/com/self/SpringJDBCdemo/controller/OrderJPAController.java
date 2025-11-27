@@ -9,6 +9,7 @@ import com.self.SpringJDBCdemo.model.OrderJPA;
 import com.self.SpringJDBCdemo.service.OrderJPAService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,9 +39,15 @@ public class OrderJPAController {
         return orderService.createOrder(user_id, request);
     }
 
-    @GetMapping("/user/{userId}/orders")
-    public List<OrderResponseDTO> getUserOrders(@PathVariable int userId){
-        return orderService.getOrdersByUser(userId);
+    @GetMapping("/orders/user/{userId}/orders/paged")
+    public Page<OrderResponseDTO> getUserOrders(@PathVariable int userId, @RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "5") int size, @RequestParam(defaultValue = "id") String sortBy){
+        return  orderService.getOrdersByUser(userId, page, size, sortBy);
+    }
+
+    @PostMapping("/order/{orderId}/addProduct/{productId}")
+    public OrderResponseDTO addProduct(@PathVariable int orderId, @PathVariable int productId){
+        return orderService.addProductToOrder(orderId, productId);
     }
 
 

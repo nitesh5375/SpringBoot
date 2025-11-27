@@ -20,6 +20,20 @@ Accept: application/json
 ###
 GET http://localhost:8080/order/1
 
+###
+GET http://localhost:8080/orders/user/6/orders/paged?page=0&size=2&sortBy=user_id
+
+###
+POST http://localhost:8080/order/2/addProduct/1
+
+###
+GET http://localhost:8080/order/2
+
+
+
+
+
+
 
 
 
