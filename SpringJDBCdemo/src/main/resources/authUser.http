@@ -1,0 +1,9 @@
+###  Security related requests
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+  "username": "Ritesh",
+  "password": "1234",
+  "role": "USER"
+}

@@ -1,15 +1,20 @@
 package com.self.SpringJDBCdemo.controller;
 
 
-import com.self.SpringJDBCdemo.dto.OrderRequestDTO;
-import com.self.SpringJDBCdemo.dto.OrderResponseDTO;
-import com.self.SpringJDBCdemo.dto.UserRequestDTO;
-import com.self.SpringJDBCdemo.dto.UserResponseDTO;
+import com.self.SpringJDBCdemo.dto.*;
 import com.self.SpringJDBCdemo.exception.UserNotFoundException;
+import com.self.SpringJDBCdemo.model.AuthUser;
 import com.self.SpringJDBCdemo.model.UserJPA;
+import com.self.SpringJDBCdemo.security.JwtUtil;
+import com.self.SpringJDBCdemo.security.SecurityConfig;
 import com.self.SpringJDBCdemo.service.UserJPAService;
+import com.self.SpringJDBCdemo.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +26,20 @@ public class UserJPAController {
 
     @Autowired
     UserJPAService userJPAService;
+
+    @Autowired
+    SecurityConfig securityConfig;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
 
     @GetMapping("/userJPA")
     public List<UserResponseDTO> getAllUserJPA(){
@@ -69,6 +88,10 @@ public class UserJPAController {
     public List<UserResponseDTO> searchAboveAge(@Valid @RequestParam(name = "age") int ageLimit){
         return userJPAService.ageGreaterThan(ageLimit);
     }
+
+
+
+
 
 //    @PostMapping("/userJPA")
 //    public UserJPA createUserJPA(@Valid @RequestBody UserJPA data) throws UserNotFoundException {

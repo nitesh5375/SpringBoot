@@ -14,6 +14,7 @@ import com.self.SpringJDBCdemo.repository.OrderItemRepository;
 import com.self.SpringJDBCdemo.repository.OrderJPARepository;
 import com.self.SpringJDBCdemo.repository.ProductRepository;
 import com.self.SpringJDBCdemo.repository.UserJPARepository;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,6 +22,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import com.self.SpringJDBCdemo.dto.CreateOrderDTO;
+import com.self.SpringJDBCdemo.dto.CreateOrderItemDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,6 +37,11 @@ public class OrderJPAService {
     @Autowired private ModelMapper modelMapper;
     @Autowired private ProductRepository productRepo;
 
+
+    @Transactional
+    // @Transactional ensures:
+    // If save() fails → nothing is committed
+    // If exception occurs → auto rollback
     public OrderResponseDTO createOrder(int userId, OrderRequestDTO request){
         UserJPA user = userRepo.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -100,6 +108,42 @@ public class OrderJPAService {
 
         return modelMapper.map(order, OrderResponseDTO.class);
     }
+
+    @Transactional
+    //By default:
+    //✅ Spring rolls back unchecked exceptions
+    //RuntimeException    //Error
+    //❌ Spring does NOT roll back checked exceptions
+    //Exception    //IOException    //ParseException    //SQLException (if thrown as checked)
+
+    //@Transactional(rollbackfor = Exception.class)
+    //It overrides the default and tells Spring:
+    //If ANY exception happens (checked or unchecked), rollback the transaction.
+    public OrderResponseDTO createFullOrder(CreateOrderDTO dto) {
+
+        UserJPA user = userRepo.findById(dto.getUserId())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        OrderJPA order = new OrderJPA();
+        order.setDescription(dto.getDescription());
+        order.setUser(user);
+
+        // save order first
+        orderRepo.save(order);
+
+        // now add items
+        for(CreateOrderItemDTO itemDTO : dto.getItems()) {
+            OrderItemJPA item = new OrderItemJPA();
+            item.setProductName(itemDTO.getProductName());
+            item.setQuantity(itemDTO.getQty());
+            item.setOrder(order);
+
+            itemRepo.save(item);
+        }
+
+        return modelMapper.map(order, OrderResponseDTO.class);
+    }
+
 
 
 }

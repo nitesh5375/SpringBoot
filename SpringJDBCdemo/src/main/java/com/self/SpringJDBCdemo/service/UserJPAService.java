@@ -4,7 +4,9 @@ package com.self.SpringJDBCdemo.service;
 import com.self.SpringJDBCdemo.dto.UserRequestDTO;
 import com.self.SpringJDBCdemo.dto.UserResponseDTO;
 import com.self.SpringJDBCdemo.exception.UserNotFoundException;
+import com.self.SpringJDBCdemo.model.AuthUser;
 import com.self.SpringJDBCdemo.model.UserJPA;
+import com.self.SpringJDBCdemo.repository.AuthUserRepository;
 import com.self.SpringJDBCdemo.repository.UserJPARepository;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
@@ -22,6 +24,8 @@ public class UserJPAService {
     @Autowired
     private UserJPARepository userJPARepository;
 
+    @Autowired
+    private AuthUserRepository authUserRepository;
     @Autowired
     ModelMapper modelMapper;
 
@@ -88,6 +92,8 @@ public class UserJPAService {
         }
         return users.stream().map(user -> modelMapper.map(user, UserResponseDTO.class)).toList();
     }
+
+
 
 
 //
