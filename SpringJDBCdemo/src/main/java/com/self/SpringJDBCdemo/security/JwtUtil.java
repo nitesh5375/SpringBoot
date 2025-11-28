@@ -17,7 +17,8 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private String secret = "my_secret_key";
+    private String secret = "nZr7P4lv+Y3rW7DH8sq8J8pQHXRuubIG9JpncCEgh9U=";
+
 
     public String generateToken(String username){
         return Jwts.builder().setSubject(username).setExpiration(new Date(System.currentTimeMillis()+32434432)).signWith(SignatureAlgorithm.HS256, secret).compact();

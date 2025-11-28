@@ -9,10 +9,15 @@ public class AuthUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+
+    //Hibernate maps columns by FIELD ORDER when no @Column is used
+    @Column(name = "username")
     private String username;
 
+    @Column(name = "password")
     private String password;
 
+    @Column(name = "role")
     private String role; // ROLE_USER, ROLE_ADMIN
 
     public int getId() {

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 public class AuthUserService {
 
     @Autowired
-    private AuthUserRepository authUserRepository;
+    public AuthUserRepository authUserRepository;
 
     public void registerUser(AuthUser user) {
         authUserRepository.save(user);
