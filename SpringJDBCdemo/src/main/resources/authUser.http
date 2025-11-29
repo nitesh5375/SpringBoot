@@ -18,3 +18,6 @@ Accept: application/json
   "username": "Ramm",
   "password": "not"
 }
+
+### use of actuator
+GET http://localhost:8080/actuator/health
