@@ -19,6 +19,16 @@ public class OrderJPA {
     @JoinColumn(name = "user_id")       // creating a column in orders table //JPA ALWAYS maps foreign keys to the primary key of the target entity unless otherwise stated using @MapsId
     private UserJPA user;       //FK to primary key of UserJPA table
 
+    //Default behavior differs by relation type:
+    //
+    //@ManyToOne → EAGER by default
+    //
+    //@OneToOne → EAGER by default
+    //
+    //@OneToMany → LAZY by default
+    //
+    //@ManyToMany → LAZY by default
+
     @OneToMany(fetch = FetchType.LAZY,
             mappedBy = "order", //It tells Hibernate that the foreign key for this relationship is NOT in this entity (OrderJPA), but in the child entity (OrderItemJPA) inside the field named 'order'.
     cascade = CascadeType.ALL,  //cascade = CascadeType.ALL tells Hibernate: “Whenever you perform an operation on the parent, automatically apply the same operation to the children.”
