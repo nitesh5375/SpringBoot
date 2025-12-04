@@ -5,11 +5,14 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+//@Entity → tells JPA/Hibernate that the class represents a database entity (table).
+//@Entity also tells Hibernate to create a table if using auto DDL (spring.jpa.hibernate.ddl-auto=create/update).
 @Entity
-@Table(name = "users")
+@Table(name = "users")  //If @Table is not used, JPA will use the class name as the table name.
 public class UserJPA {
 
     @Id         // This annotations indicates to hibernate that it is a primary key
+    //@Id marks the primary key field, which is required for every entity so Hibernate can uniquely identify records.
     @GeneratedValue(strategy = GenerationType.IDENTITY)  //@GeneratedValue means “Do NOT expect the application to set the id. Generate it automatically.”
     //IDENTITY means:
     //✔ The database generates the primary key
@@ -25,6 +28,9 @@ public class UserJPA {
 //    @Max(value = 60, message = "User must be below 60")
     private int age;
 
+    //the owner of the relationship is usually the side with @ManyToOne.
+    //@OneToMany side often uses mappedBy to point back to the owning side.
+    //@OneToMany is used on the parent side and represents a collection of child records.
     @OneToMany(mappedBy = "user", //It tells Hibernate that the foreign key for this relationship is NOT in this entity (UserJPA), but in the child entity (OrderJPA) inside the field named 'user'.
             cascade = CascadeType.ALL,  //cascade = CascadeType.ALL tells Hibernate: “Whenever you perform an operation on the parent, automatically apply the same operation to the children.”
             fetch = FetchType.LAZY)  //user = { id=1, name="Alex", age=25 }
