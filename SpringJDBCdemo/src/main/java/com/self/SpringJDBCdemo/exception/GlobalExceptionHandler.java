@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ControllerAdvice
+//@ControllerAdvice is a global exception handling and controller-logic customization mechanism in Spring Boot.
+//It allows you to write code that applies to all controllers instead of repeating logic in every controller.
+//Handle exceptions thrown from any controller in one place.
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
