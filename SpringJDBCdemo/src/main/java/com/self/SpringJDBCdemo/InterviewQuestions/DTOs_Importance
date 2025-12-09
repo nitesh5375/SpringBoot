@@ -1,0 +1,56 @@
+QUESTION:
+In your project, did you use DTOs? Why not expose Entities directly to the API layer?
+
+ANSWER:
+
+Yes, we used DTOs in our project.
+We never expose JPA entities directly because:
+1️⃣ Security – Prevent exposing internal fields
+Entities often contain:
+passwords / hashed values
+internal IDs
+audit fields
+foreign keys
+Exposing them leaks table structure & sensitive information.
+
+
+2️⃣ Prevent Over-posting (Very important in interviews)
+If you expose entities, a user can send fields you're not expecting:
+{
+  "price": 0,
+  "isAdmin": true
+}
+Spring will bind them → dangerous.
+DTOs allow only allowed fields.
+
+
+3️⃣ API Contract Stability
+Entities change often due to:
+new columns
+DB optimizations
+relationship changes
+If you expose entities → every DB change breaks frontend APIs.
+DTOs act as a stable contract.
+
+
+4️⃣ Avoid LazyInitializationException
+Entities have relationships (@OneToMany, @ManyToOne).
+If controller serializes an entity directly:
+Jackson tries to access lazy-loaded fields
+You get LazyInitializationException
+DTOs avoid this by mapping only required fields.
+
+
+5️⃣ Performance
+Large entities may contain:
+collections (hundreds of rows)
+heavy relational graphs
+DTOs send only the required projection, avoids unnecessary DB fetch.
+
+
+6️⃣ Prevent exposing internal model design
+DTOs hide:
+table names
+relationships
+internal business logic fields
+Architectural encapsulation.

@@ -1,0 +1,50 @@
+QUESTION:
+What is the difference between @OneToMany and @ManyToOne?
+And in a real project, which side should own the foreign key and why?**
+
+ANSWER:
+
+@OneToMany
+One parent has many children
+Example: One User → Many Orders
+Usually mapped as mappedBy side (non-owning)
+
+@ManyToOne
+Many children point to one parent
+Example: Many Orders → One User
+This is the owning side (the side that holds the foreign key)
+
+
+🔥 Which side should own the Foreign Key? And why?
+✅ The FK should always be on the @ManyToOne side (the many side).
+Why?
+1️⃣ That’s how relational databases work
+The child row (Order) stores:
+user_id (FK)
+
+2️⃣ Inserting new child records requires knowing the parent
+When creating a new Order, you must know which User it belongs to.
+So FK naturally belongs in Order (many side).
+
+
+3️⃣ Makes cascading and updates predictable
+Deleting a user:
+CASCADE → deletes all orders
+SET NULL → clears FK
+Restrict → prevents delete
+This is all easy because FK is on the many side.
+
+
+4️⃣ Avoids unnecessary join tables
+If you make @OneToMany the owner,
+Hibernate creates a join table, which is bad for performance.
+Correct (FK in child table):
+order.user_id
+Wrong (join table):
+user_order_mapping_table
+
+
+5️⃣ Simpler, more natural API
+You simply do:
+order.setUser(user);
+orderRepository.save(order);

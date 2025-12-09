@@ -1,0 +1,63 @@
+QUESTION:
+What is the difference between fetch = FetchType.LAZY and FetchType.EAGER?
+
+ANSWER:
+
+These are present in both @OneToMany and @ManyToOne.
+
+
+FetchType.LAZY
+Associations are NOT loaded unless accessed.
+Hibernate creates a proxy object.
+SQL is executed only when the related field is accessed.
+Example:
+User user = order.getUser();  // triggers SQL for user also
+
+
+FetchType.EAGER
+Association is loaded immediately with the entity.
+Hibernate fires extra joins OR extra queries.
+Can cause performance issues in production.
+
+
+🔥 Real Production Problems Caused by EAGER Loading
+1️⃣ N+1 Query Problem (Biggest issue)
+Example: Fetching 100 Orders with EAGER user:
+SELECT * FROM orders;  
++   
+100 times: SELECT * FROM users WHERE id = ?
+→ 101 queries instead of 1 query
+→ Severe DB slowdown in production.
+Interviewers expect you to mention N+1.
+
+
+2️⃣ Unnecessary heavy joins
+If @OneToMany is EAGER (which you should NEVER use):
+SELECT * FROM user
+LEFT JOIN orders
+LEFT JOIN addresses
+LEFT JOIN transactions
+→ Returns thousands of unnecessary rows
+→ Memory spikes
+→ Slow response time
+
+
+3️⃣ Serialization issues when returning JSON
+Spring Boot + Jackson tries to serialize the entire graph:
+User → Orders → User → Orders → (infinite loop)
+Causes:
+StackOverflowError
+Large JSON output
+LazyInitializationException when session is closed
+
+
+4️⃣ Memory Overload
+If a User has 5000 orders, EAGER will load all of them even if you only need:
+{
+  "username": "nitesh"
+}
+Waste of RAM & CPU.
+When to use EAGER?
+Almost never.
+Only for:
+@ManyToOne when the related object is tiny and always needed
