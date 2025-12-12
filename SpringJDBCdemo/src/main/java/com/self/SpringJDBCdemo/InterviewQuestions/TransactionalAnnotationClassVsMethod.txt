@@ -1,0 +1,135 @@
+QUESTION:
+When a method annotated with @Transactional executes, Spring starts a database transaction before the method begins. what does it mean?
+
+ANSWER:
+Assume you have:
+@Transactional
+public void updateUser() {
+    userRepository.save(...);
+}
+Step-by-step explanation
+1️⃣ Spring opens a DB transaction BEFORE the method body runs
+Spring tells the database something like:
+BEGIN TRANSACTION;
+(or the equivalent depending on the DB vendor)
+This means:
+All SQL operations inside this method will now run inside one single atomic transaction.
+They will not be permanently saved until Spring issues a COMMIT.
+The important idea:
+➡️ The moment control enters the method, a transaction context already exists.
+2️⃣ All repository calls inside the method participate in THIS transaction
+Example:
+userRepo.save(user);   // part of the same transaction
+orderRepo.save(order); // same transaction
+If any of these fail → everything rolls back.
+3️⃣ After the method completes, Spring decides:
+✔ If no exception → Spring sends COMMIT
+DB now permanently saves:
+COMMIT;
+❌ If an exception occurs → Spring sends ROLLBACK
+DB discards all SQL operations:
+ROLLBACK;
+🔍 Why does Spring need to start the transaction before entering the method?
+Because:
+If you run multiple SQL updates, they must belong to the same atomic block.
+You cannot start/commit a transaction after some SQL has already executed.
+Spring must prepare the transactional context for the entire method.
+🧠 Example timeline
+With @Transactional:
+[Spring] BEGIN
+   ↓
+execute method
+   ↓
+[Spring] COMMIT or ROLLBACK
+Without @Transactional:
+Every SQL executes independently:
+SQL1 committed immediately
+SQL2 committed immediately
+SQL3 committed immediately
+If SQL3 fails → SQL1 and SQL2 are already saved → ❌ inconsistent state.
+
+<--------------------------------------------------------------------------------------------------------------------->
+QUESTION:
+what happens if a method inside a transactional class is marked as @Transactional(propagation = Propagation.REQUIRES_NEW)
+
+ANSWER:
+✅ What does REQUIRES_NEW mean?
+When a method is annotated with REQUIRES_NEW, Spring:
+Suspends the currently running transaction (if any)
+Starts a brand-new independent transaction
+When the method finishes → commits or rolls back independently
+Then resumes the original transaction
+✅ Where is it useful?
+Logging events that must be saved even if main transaction fails
+Sending emails / audit logs
+Saving partial progress
+Retrying operations
+Compensating transactions
+⭐ Complete Example
+Imagine an order placement process:
+▶ Main flow (big transaction)
+Save order
+Deduct inventory
+Charge payment
+▶ But you always want to save an audit log
+EVEN IF order creation fails.
+📌 Java Code Example
+@Service
+public class OrderService {
+    @Autowired
+    private PaymentService paymentService;
+    @Autowired
+    private AuditService auditService;
+    @Transactional
+    public void placeOrder(Order order) {
+        // MAIN TRANSACTION STARTS
+        // Step 1: save the order
+        saveOrder(order);
+        // Step 2: try payment
+        try {
+            paymentService.chargeCustomer(order);
+        } catch (Exception e) {
+            // Payment failed → order fails
+            // BUT AUDIT LOG MUST STILL BE SAVED
+            auditService.saveAuditLog("Payment failed for order " + order.getId());
+            throw e;
+        }
+        // Step 3: successful
+        auditService.saveAuditLog("Order placed successfully: " + order.getId());
+        // MAIN TRANSACTION COMMITS (unless an exception)
+    }
+}
+📌 Audit Service with REQUIRES_NEW
+@Service
+public class AuditService {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void saveAuditLog(String message) {
+        AuditLog log = new AuditLog();
+        log.setMessage(message);
+        log.setTimestamp(LocalDateTime.now());
+        // SAVE in a NEW TRANSACTION
+        auditLogRepository.save(log);
+    }
+}
+⭐ What happens step-by-step?
+Case 1 → PAYMENT FAILS
+Part	Transaction	Result
+placeOrder()	T1	Rolls back
+saveAuditLog()	T2 (NEW)	Commits successfully
+➡ Audit success message is saved even though order failed.
+Case 2 → ORDER SUCCESS
+Both logs:
+"Order placed successfully…" → committed in T2
+Entire order logic → committed in T1
+🔥 Visual Transaction Flow
+placeOrder() -- starts Transaction T1
+    |
+    |-- chargeCustomer() --> fails
+    |
+    |-- saveAuditLog() -- starts Transaction T2
+    |        |
+    |        |-- T2 commits independently
+    |
+T1 rolls back
+
+Note: if T2 fails, does not mean T1 will also rollback. and if T1 fails, T1 is paused and

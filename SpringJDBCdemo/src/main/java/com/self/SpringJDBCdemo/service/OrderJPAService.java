@@ -42,6 +42,8 @@ public class OrderJPAService {
     // @Transactional ensures:
     // If save() fails → nothing is committed
     // If exception occurs → auto rollback
+    // method access type must be public
+    //DB modifying methods need @Transactional annotation
     public OrderResponseDTO createOrder(int userId, OrderRequestDTO request){
         UserJPA user = userRepo.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
