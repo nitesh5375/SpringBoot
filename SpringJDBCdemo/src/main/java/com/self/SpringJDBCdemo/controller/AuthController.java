@@ -36,7 +36,8 @@ public class AuthController {
     @Autowired
     private ModelMapper modelMapper;
 
-
+    //In Spring, every request firstly goes into jwtFilter and sees whether I have to filter it according to 'ShouldNotFilter' method
+    // If skipped then request comes and authentication happens in controller class,
     @PostMapping("/auth/register")
     public String register(@RequestBody AuthUser user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -57,10 +58,13 @@ public class AuthController {
                 });
 
         try {
+            //At this point user is authenticated only for this request
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
 
+            //Token contains:
+            //username //issuedAt //expiry //signature
         String token = jwtUtil.generateToken(request.getUsername());
 
         return new LoginResponse(
@@ -69,6 +73,7 @@ public class AuthController {
                 "Login successful"
         );
 
+        //if authentication fails, catch block throws error.
     } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Authentication failed: " + e.getMessage());

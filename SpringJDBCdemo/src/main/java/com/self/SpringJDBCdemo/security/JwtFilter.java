@@ -15,6 +15,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+//Every Request enters Spring Security Filter Chain
+//extends OncePerRequestFilter forces each request to go through shouldNotFilter() and checked FIRST
+//if skipped then goes to controller directly otherwise gets validated in doFilterInternal() and gets validated then respective controller
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -25,7 +28,19 @@ public class JwtFilter extends OncePerRequestFilter {
     private CustomUserDetailsService userDetailsService;
 
 
+/*
+Every HTTP request goes through:
 
+Client
+  ↓
+Spring Security Filter Chain
+  ↓
+DispatcherServlet
+  ↓
+Controller
+
+So filters ALWAYS run before controllers.
+ */
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -45,6 +60,7 @@ public class JwtFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    //all request goes through this method, it filters whether to authenticate or not.
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
