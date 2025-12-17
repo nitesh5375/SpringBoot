@@ -5,50 +5,91 @@ import com.self.SpringJDBCdemo.dto.AddItemRequestDTO;
 import com.self.SpringJDBCdemo.dto.OrderItemDTO;
 import com.self.SpringJDBCdemo.dto.OrderRequestDTO;
 import com.self.SpringJDBCdemo.dto.OrderResponseDTO;
-import com.self.SpringJDBCdemo.model.OrderJPA;
 import com.self.SpringJDBCdemo.service.OrderJPAService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
+@RequestMapping("/order")
 public class OrderJPAController {
 
     @Autowired
     private OrderJPAService orderService;
 
-
-
-    @PostMapping("/order/{orderId}/items")
-    public OrderItemDTO addItem(@PathVariable int orderId,
-                                @RequestBody @Valid AddItemRequestDTO req){
-        return orderService.addItem(orderId, req);
+    @GetMapping("/ping")
+    public String ping(@AuthenticationPrincipal UserDetails userDetails) {
+        System.out.println(userDetails.getUsername());
+        return "pong";
     }
 
-    @GetMapping("/order/{orderId}")
-    public OrderResponseDTO getOrder(@PathVariable int orderId){
-        return orderService.getOrderWithItems(orderId);
-    }
-
-
-    @PostMapping("/order/user/{user_id}")
-    public OrderResponseDTO createOrder(@PathVariable int user_id, @RequestBody @Valid OrderRequestDTO request){
-        return orderService.createOrder(user_id, request);
-    }
-
-    @GetMapping("/orders/user/{userId}/orders/paged")
-    public Page<OrderResponseDTO> getUserOrders(@PathVariable int userId, @RequestParam(defaultValue = "0") int page,
-                                                @RequestParam(defaultValue = "5") int size, @RequestParam(defaultValue = "id") String sortBy){
-        return  orderService.getOrdersByUser(userId, page, size, sortBy);
-    }
-
-    @PostMapping("/order/{orderId}/addProduct/{productId}")
-    public OrderResponseDTO addProduct(@PathVariable int orderId, @PathVariable int productId){
-        return orderService.addProductToOrder(orderId, productId);
+    /* ---------------------------------------
+       CREATE ORDER (Authenticated user only)
+       --------------------------------------- */
+    @PostMapping
+    public OrderResponseDTO createOrder(
+            @RequestBody @Valid OrderRequestDTO request,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return orderService.createOrder(userDetails.getUsername(), request);
     }
 
 
+
+
+    /* ---------------------------------------
+       GET SINGLE ORDER (Ownership enforced)
+       --------------------------------------- */
+    @GetMapping("/{orderId}")
+    public OrderResponseDTO getOrder(
+            @PathVariable int orderId,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        System.out.println("inside getOrder and will fetch order details");
+        return orderService.getOrderForUser(orderId, userDetails.getUsername());
+    }
+
+    /* ---------------------------------------
+       ADD ITEM TO ORDER
+       --------------------------------------- */
+    @PostMapping("/{orderId}/items")
+    public OrderItemDTO addItem(
+            @PathVariable int orderId,
+            @RequestBody @Valid AddItemRequestDTO req,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return orderService.addItem(orderId, req, userDetails.getUsername());
+    }
+
+    /* ---------------------------------------
+       GET USER ORDERS (Paged)
+       --------------------------------------- */
+    @GetMapping("/my")
+    public Page<OrderResponseDTO> getMyOrders(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "id") String sortBy
+    ) {
+        return orderService.getOrdersByUsername(
+                userDetails.getUsername(), page, size, sortBy);
+    }
+
+    /* ---------------------------------------
+       ADD PRODUCT TO ORDER
+       --------------------------------------- */
+    @PostMapping("/{orderId}/addProduct/{productId}")
+    public OrderResponseDTO addProduct(
+            @PathVariable int orderId,
+            @PathVariable int productId,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        return orderService.addProductToOrder(
+                orderId, productId, userDetails.getUsername());
+    }
 }
+

@@ -15,8 +15,8 @@ public class OrderJPA {
 
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)  //"Load only when needed" //proxies (fake placeholder objects). // will only be invoked when user.getUser() is called
-    @JoinColumn(name = "user_id")       // creating a column in orders table //JPA ALWAYS maps foreign keys to the primary key of the target entity unless otherwise stated using @MapsId
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)  //"Load only when needed" //proxies (fake placeholder objects). // will only be invoked when user.getUser() is called
+    @JoinColumn(name = "user_id", nullable = false)       // creating a column in orders table //JPA ALWAYS maps foreign keys to the primary key of the target entity unless otherwise stated using @MapsId
     private UserJPA user;       //FK to primary key of UserJPA table
 
     //Default behavior differs by relation type:
@@ -35,6 +35,13 @@ public class OrderJPA {
             orphanRemoval = true // it means if parent entry is deleted, then associated FK items in child will also get deleted.
     )
     private List<OrderItemJPA> items = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(name = "orders_products",
+            joinColumns = @JoinColumn(name = "order_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id")
+    )
+    private List<Product> products = new ArrayList<>();
 
     public List<OrderItemJPA> getItems() {
         return items;
@@ -78,12 +85,7 @@ public class OrderJPA {
         this.user = user;
     }
 
-    @ManyToMany
-    @JoinTable(name = "orders_products",
-    joinColumns = @JoinColumn(name = "order_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id")
-    )
-    private List<Product> products;
+
 
     public List<Product> getProducts() {
         return products;

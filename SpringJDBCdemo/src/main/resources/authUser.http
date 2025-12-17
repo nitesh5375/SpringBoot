@@ -4,7 +4,7 @@ POST http://localhost:8080/auth/register
 Content-Type: application/json
 
 {
-  "username": "Ramm",
+  "username": "New",
   "password": "not",
   "role": "USER"
 }
@@ -15,7 +15,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "username": "Ramm",
+  "username": "New",
   "password": "not"
 }
 

@@ -2,6 +2,9 @@ package com.self.SpringJDBCdemo.dto;
 
 import jakarta.validation.constraints.*;
 
+//Validation should be done ONLY in Request DTOs
+//NOT in Response DTOs
+//NOT in Entity (Model) classes (in most cases)
 public class UserRequestDTO {
 
     //    @NotNull(message = "Name can not be empty")       //NotNull is fine, but it accepts ""  value which is not desired.

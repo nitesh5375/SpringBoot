@@ -5,15 +5,20 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+//Validation should be done ONLY in Request DTOs
+//NOT in Response DTOs
+//NOT in Entity (Model) classes (in most cases)
+
 //@Entity → tells JPA/Hibernate that the class represents a database entity (table).
 //@Entity also tells Hibernate to create a table if using auto DDL (spring.jpa.hibernate.ddl-auto=create/update).
 @Entity
-@Table(name = "users")  //If @Table is not used, JPA will use the class name as the table name.
+@Table(name = "users",
+        uniqueConstraints = @UniqueConstraint(columnNames = "username"))  //If @Table is not used, JPA will use the class name as the table name.
 public class UserJPA {
 
     @Id         // This annotations indicates to hibernate that it is a primary key
     //@Id marks the primary key field, which is required for every entity so Hibernate can uniquely identify records.
-    @GeneratedValue(strategy = GenerationType.IDENTITY)  //@GeneratedValue means “Do NOT expect the application to set the id. Generate it automatically.”
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)  //@GeneratedValue means “Do NOT expect the application to set the id. Generate it automatically.”
     //IDENTITY means:
     //✔ The database generates the primary key
     //✔ Using AUTO_INCREMENT
@@ -22,6 +27,10 @@ public class UserJPA {
 //    @NotNull(message = "Name can not be empty")       //NotNull is fine but it accepts ""  value which is not desired.
 //    @NotEmpty(message = "Name can not be empty")
 //        @Size(min =1, max =50, message = "Name must be between 1 to 50 characters")
+@Column(nullable = false, length = 50)
+    private String username;
+
+@Column(nullable = false, length = 50)
     private String name;
 
 //    @Min(value =18, message = "user must be above 18")
@@ -33,6 +42,7 @@ public class UserJPA {
     //@OneToMany is used on the parent side and represents a collection of child records.
     @OneToMany(mappedBy = "user", //It tells Hibernate that the foreign key for this relationship is NOT in this entity (UserJPA), but in the child entity (OrderJPA) inside the field named 'user'.
             cascade = CascadeType.ALL,  //cascade = CascadeType.ALL tells Hibernate: “Whenever you perform an operation on the parent, automatically apply the same operation to the children.”
+            orphanRemoval = true,
             fetch = FetchType.LAZY)  //user = { id=1, name="Alex", age=25 }
                                     // orders = LAZY proxy (empty placeholder)
 
@@ -44,16 +54,24 @@ public class UserJPA {
     //✔ Easy cascade save/update/delete
     //✔ Easy business logic operations
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String name) {
+        this.username = name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public int getId() {
-        return id;
     }
 
     public void setId(int id) {

@@ -1,30 +1,73 @@
 package com.self.SpringJDBCdemo.security;
 
-//A JSON Web Token (JWT) is a compact, URL-safe means of representing claims (information) to be transferred between two parties.
-//A JWT is a string divided into three parts, separated by dots (.)
-//Header (JOS Header) //Payload (Claims)  //Signature
-//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9 . eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ . SflKxwRJSMeKKF2QT4fWsyDjmAVhT5TzSdGWfNawERk
-//{"alg": "HS256", "typ": "JWT"}        //{"sub": "1234567890", "name": "John Doe", "iat": 1516239022}
-//alg = algorithm used  JWT = Authentication type  sub = (Subject):User ID  name: User's name. iat (Issued At): Timestamp when the token was issued.
-//The signature ensures the token's integrity. It is generated using the specified algorithm (HS256) over the concatenated (Header + Payload) string, along with a secret key known only to the server.
-
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
 
-    private String secret = "nZr7P4lv+Y3rW7DH8sq8J8pQHXRuubIG9JpncCEgh9U=";
+    // 🔐 Must be at least 256 bits (32 chars) for HS256
+    private static final String SECRET =
+            "nZr7P4lv+Y3rW7DH8sq8J8pQHXRuubIG9JpncCEgh9U=";
 
-
-    public String generateToken(String username){
-        return Jwts.builder().setSubject(username).setExpiration(new Date(System.currentTimeMillis()+32434432)).signWith(SignatureAlgorithm.HS256, secret).compact();
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String extractUsername(String token){
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
+    /* ---------------------------------------
+       Generate Token
+       --------------------------------------- */
+    public String generateToken(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 60 * 60 * 1000)) // 1 hour
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /* ---------------------------------------
+       Extract Username
+       --------------------------------------- */
+    public String extractUsername(String token) {
+        return extractAllClaims(token).getSubject();
+    }
+
+    /* ---------------------------------------
+       Validate Token
+       --------------------------------------- */
+    public boolean validateToken(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+    }
+
+    /* ---------------------------------------
+       Expiration check
+       --------------------------------------- */
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    public Date extractExpiration(String token) {
+        return extractAllClaims(token).getExpiration();
+    }
+
+    /* ---------------------------------------
+       Parse Claims
+       --------------------------------------- */
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

@@ -1,40 +1,70 @@
-###
+#############################################
+# Base Configuration
+#############################################
 
-http://localhost:8080/orders/users/6
+@baseUrl = http://localhost:8080
+@jwt_token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJOZXciLCJpYXQiOjE3NjU5NzY2OTAsImV4cCI6MTc2NTk4MDI5MH0.c-ST1-njgxvQ3kwBnI89Rw4MBwKcTzHCsd22V5gixNs
+
+############################################
+GET http://localhost:8080/order/ping
+Authorization: Bearer {{jwt_token}}
+############################################
+#############################################
+# 1️⃣ CREATE ORDER (Authenticated User)
+#############################################
+
+POST {{baseUrl}}/order
 Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
 
 {
   "description": "First Order"
 }
 
 ###
-POST http://localhost:8080/order/1/items
+#############################################
+# 2️⃣ ADD ITEM TO ORDER
+#############################################
+
+POST {{baseUrl}}/order/1/items
 Content-Type: application/json
 Accept: application/json
+Authorization: Bearer {{jwt_token}}
 
 {
   "productName": "Case",
   "quantity": 1,
   "price": 1999.00
 }
-###
-GET http://localhost:8080/order/1
 
 ###
-GET http://localhost:8080/orders/user/6/orders/paged?page=0&size=2&sortBy=user_id
+#############################################
+# 3️⃣ GET SINGLE ORDER (Ownership enforced)
+#############################################
+
+GET {{baseUrl}}/order/1
+Authorization: Bearer {{jwt_token}}
 
 ###
-POST http://localhost:8080/order/2/addProduct/1
+#############################################
+# 4️⃣ GET LOGGED-IN USER ORDERS (PAGED)
+#############################################
+
+GET {{baseUrl}}/order/my?page=0&size=2&sortBy=id
+Authorization: Bearer {{jwt_token}}
 
 ###
-GET http://localhost:8080/order/2
+#############################################
+# 5️⃣ ADD PRODUCT TO ORDER
+#############################################
 
+POST {{baseUrl}}/order/2/addProduct/1
+Authorization: Bearer {{jwt_token}}
 
+###
+#############################################
+# 6️⃣ GET ORDER AFTER PRODUCT ADD
+#############################################
 
-
-
-
-
-
-
-
+GET {{baseUrl}}/order/2
+Authorization: Bearer {{jwt_token}}

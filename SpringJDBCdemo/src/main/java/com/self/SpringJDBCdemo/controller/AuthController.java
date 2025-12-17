@@ -22,26 +22,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private AuthUserService authUserService;
-    @Autowired
-    private ModelMapper modelMapper;
+    private AuthUserService authService;
 
     //In Spring, every request firstly goes into jwtFilter and sees whether I have to filter it according to 'ShouldNotFilter' method
     // If skipped then request comes and authentication happens in controller class,
     @PostMapping("/auth/register")
     public String register(@RequestBody AuthUser user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        authUserService.registerUser(user);
+        authService.registerUser(user);
 
         return "User registered successfully";
 
@@ -49,34 +44,6 @@ public class AuthController {
 
     @PostMapping("/auth/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
-        System.out.println("Entered password: " + request.getPassword());
-
-        authUserService.authUserRepository.findByUsername(request.getUsername())
-                .ifPresent(u -> {
-                    System.out.println("Stored hash: " + u.getPassword());
-                    System.out.println("Matches? " + passwordEncoder.matches(request.getPassword(), u.getPassword()));
-                });
-
-        try {
-            //At this point user is authenticated only for this request
-            Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-            );
-
-            //Token contains:
-            //username //issuedAt //expiry //signature
-        String token = jwtUtil.generateToken(request.getUsername());
-
-        return new LoginResponse(
-                token,
-                request.getUsername(),
-                "Login successful"
-        );
-
-        //if authentication fails, catch block throws error.
-    } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Authentication failed: " + e.getMessage());
-    }
+        return authService.login(request);
     }
 }

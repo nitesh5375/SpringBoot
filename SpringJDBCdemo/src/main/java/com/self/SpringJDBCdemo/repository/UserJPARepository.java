@@ -15,6 +15,8 @@ import java.util.Optional;
 
     Optional<UserJPA> findByName(String name);      //if multiple user exists with the same name, API will give 500 error
 
+    Optional<UserJPA> findByUsername(String username);
+
     List<UserJPA> findByAgeGreaterThan(int age);
 
     List<UserJPA> findByAgeBetween(int start, int end);

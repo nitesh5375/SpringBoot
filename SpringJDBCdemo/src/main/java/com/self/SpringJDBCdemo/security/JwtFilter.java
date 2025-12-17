@@ -10,63 +10,102 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-//Every Request enters Spring Security Filter Chain
-//extends OncePerRequestFilter forces each request to go through shouldNotFilter() and checked FIRST
-//if skipped then goes to controller directly otherwise gets validated in doFilterInternal() and gets validated then respective controller
+// Every HTTP request enters the Spring Security Filter Chain
+// This filter runs BEFORE the controller
+//
+// Client
+//   ↓
+// Spring Security Filter Chain
+//   ↓
+// DispatcherServlet
+//   ↓
+// Controller
+//
+// OncePerRequestFilter guarantees that this filter is executed
+// ONLY ONCE per request (important for security correctness)
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
     @Autowired
-    JwtUtil jwtUtil;
+    private JwtUtil jwtUtil;
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
+    /*
+        Flow inside this filter:
 
-/*
-Every HTTP request goes through:
-
-Client
-  ↓
-Spring Security Filter Chain
-  ↓
-DispatcherServlet
-  ↓
-Controller
-
-So filters ALWAYS run before controllers.
- */
-
+        1. Read Authorization header
+        2. Extract JWT token
+        3. Extract username from token
+        4. Load UserDetails from DB
+        5. Validate token (signature + expiry)
+        6. Create Authentication object
+        7. Store Authentication in SecurityContext
+        8. Continue filter chain
+     */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
+        // Authorization: Bearer <token>
         String header = request.getHeader("Authorization");
-        if(header !=null && header.startsWith("Bearer ")){
-            String token = header.substring(7);
+
+        if (header != null && header.startsWith("Bearer ")) {
+
+            String token = header.substring(7); // remove "Bearer "
             String username = jwtUtil.extractUsername(token);
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            // Only set authentication if it is not already set
+            if (username != null &&
+                    SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
+                // Load user from database
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(username);
 
-            SecurityContextHolder.getContext().setAuthentication(auth);
+                // Validate token (username match + expiration)
+                if (jwtUtil.validateToken(token, userDetails)) {
+
+                    // This constructor with authorities MARKS the user as authenticated
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
+
+                    // Store authentication in SecurityContext
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(authentication);
+                }
+            }
         }
 
+        // Always continue the filter chain
         filterChain.doFilter(request, response);
     }
 
-    //all request goes through this method, it filters whether to authenticate or not.
+    /*
+        This method decides WHETHER this filter should run for a request.
+
+        We want to SKIP JWT validation ONLY for authentication endpoints
+        like /auth/login and /auth/register.
+
+        All other endpoints MUST pass through this filter.
+     */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return !path.startsWith("/auth/")
-                || path.equals("/auth/login")
-                || path.equals("/auth/register");
-    }
 
+        // Skip JWT filter only for auth endpoints
+        return path.startsWith("/auth/");
+    }
 }
