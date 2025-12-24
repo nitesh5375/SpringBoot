@@ -1,0 +1,72 @@
+QUESTION:
+How spring distinguishes one user request from another? 2 request for /get/order
+ANSWER:
+The distinction happens using the username+token, JWT authentication is stateless. so every request and user is treated as different than previous
+and every request is validated.
+
+QUESTION:
+Explain how Spring Security + JWT works internally.
+ANSWER:
+any request entering into the system will be catch by JWTfilter which extends oneperrequestfilter abstract class which implement dofilterinternal. here "shouldnotfilter" method we specify not filter auth/login requests. these request goes to controller class, where user is registered with  userid, password saved into the db with encodedpassword using passwordEncoder. now when the user login into the system these request again redirects to controller where authenticationManager will authenticate the user. this will be done in try block if authentication fails corresponding catch block will throw authentication failed message, otherwise a token is generated and return to the user.
+now for every other request user will send this token along in the authorization header, now this request is not filtered and goes to doFilterInternal method which validates the token along with username, if success the user authentication(along with user name and other details) is stored in security context.
+
+
+Spring Security + JWT — Internal Flow (End-to-End)
+1️⃣ Login Request (Username & Password)
+Client sends login request with credentials.
+Request enters Spring Security Filter Chain.
+A custom Authentication Filter (or controller) calls AuthenticationManager.
+AuthenticationManager delegates to AuthenticationProvider.
+AuthenticationProvider uses UserDetailsService to load user.
+Password is verified using PasswordEncoder.
+If authentication succeeds, an Authentication object is created.
+No session is created (JWT is stateless).
+
+2️⃣ JWT Generation
+After successful authentication:
+Username and roles are taken from Authentication.
+JWT is generated:
+Claims (subject, roles, expiry)
+Signed using secret/private key
+Token is returned to client in response.
+
+3️⃣ Subsequent Requests with JWT
+Client sends request with:
+Authorization: Bearer <JWT>
+Request enters Spring Security Filter Chain.
+A custom JWT Filter (extends OncePerRequestFilter) executes.
+
+4️⃣ JWT Validation (Per Request)
+Inside JWT Filter:
+Extract token from Authorization header.
+Validate token:
+Signature
+Expiry
+Subject
+Extract username from token.
+Load user via UserDetailsService.
+Create Authentication object.
+Store authentication in:
+SecurityContextHolder (ThreadLocal)
+
+5️⃣ Controller Access
+Controller is invoked.
+Authentication is retrieved from SecurityContext.
+@AuthenticationPrincipal or role checks work.
+Business logic executes.
+
+6️⃣ Request Completion
+Response is sent.
+Spring Security clears SecurityContext.
+Thread is returned to pool.
+No authentication state is stored server-side.
+
+
+Key Internal Components (Interview Keywords)
+Security Filter Chain: Intercepts every request
+AuthenticationManager: Coordinates authentication
+AuthenticationProvider: Validates credentials
+JWT Filter: Validates token per request
+SecurityContextHolder: Stores authentication per thread
+Stateless: Authentication rebuilt on every request
+

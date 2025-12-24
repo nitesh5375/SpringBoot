@@ -1,0 +1,62 @@
+Q1. In a real production-grade Spring Boot app, how do you structure your project packages and why?
+ANSWER:
+A good Spring Boot project follows layered architecture:
+1. controller/
+Handles HTTP/API layer
+Maps endpoints
+Validates request DTOs
+Calls services
+Returns responses
+➡ Reason: Keeps API responsibilities isolated.
+
+2. service/
+Contains business logic
+Implements use cases
+Coordinates repository calls
+Handles transactions (via @Transactional)
+➡ Reason: Keeps logic independent from persistence → easier to test & maintain.
+
+3. repository/
+Deals with DB operations
+Uses Spring Data JPA
+Contains JPQL/Native queries when required
+➡ Reason: Data access is separate → replaceable (JPA → Mongo → JDBC) without touching service.
+
+4. entity/
+JPA entities mapped to DB tables
+Contains relationships, constraints
+➡ Reason: Centralizes DB mapping.
+
+5. dto/
+Used for request/response models
+Hide internal entity fields
+Prevent over-posting issues
+Useful for security and versioning
+➡ Reason: Clean separation between API layer and DB layer.
+
+6. config/
+Contains beans, security config, swagger config, etc.
+➡ Reason: All runtime configuration stays in one place.
+
+7. exception/
+Global exception handlers (e.g., @ControllerAdvice)
+➡ Reason: Centralized error handling used in real production apps.
+
+8. security/
+JWT filters, auth providers, custom user details, etc.
+➡ Reason: Security layer should be isolated completely.
+
+9. util/
+Helpers, validators, utility classes.
+➡ Reason: Reduce duplication and keep business logic clean.
+
+⭐ Why is this structure testable & scalable?
+Testable:
+Each layer is independent → controller tests mock service, service tests mock repositories.
+Loose coupling = easy unit tests
+Scalable:
+New features drop naturally into existing folders
+Can replace any layer without rewriting the whole app
+Good for microservices growth
+
+<---------------------------------------------------------------------------------------------------------->

@@ -42,12 +42,39 @@ public class OrderJPAController {
 
 
     /* ---------------------------------------
-       GET SINGLE ORDER (Ownership enforced)
+    We return OrderResponseDTO because controllers should return business data, not manipulate HTTP responses directly.
+    Spring MVC converts the DTO into an HTTP response using message converters
+       GET SINGLE ORDER:
+       Spring MVC will:
+        Take the returned OrderResponseDTO
+        Convert it to HTTP response body (JSON)
+        Write it to the response automatically
+        OrderResponseDTO
+           ↓
+        HttpMessageConverter (Jackson)
+           ↓
+        JSON
+           ↓
+        HttpServletResponse body
+
        --------------------------------------- */
     @GetMapping("/{orderId}")
     public OrderResponseDTO getOrder(
             @PathVariable int orderId,
             @AuthenticationPrincipal UserDetails userDetails
+            /*
+            @AuthenticationPrincipal injects the currently authenticated user (the principal) into the controller method.
+            since after login, user gets a token to validate itself, now no username or any other identity is passed with
+            next requests. so to fetch the details(order, history..) of corresponding user, it reads details stored in userDetails object.
+                How it works internally (short):
+                    JWT filter validates the token.
+                    An Authentication object is created and stored in the SecurityContext.
+                    When the controller method is called, Spring Security:
+                    Reads SecurityContextHolder.getContext().getAuthentication()
+                    Extracts the principal
+                    Injects it into userDetails
+                    userDetails.getUsername()
+             */
     ) {
         System.out.println("inside getOrder and will fetch order details");
         return orderService.getOrderForUser(orderId, userDetails.getUsername());
