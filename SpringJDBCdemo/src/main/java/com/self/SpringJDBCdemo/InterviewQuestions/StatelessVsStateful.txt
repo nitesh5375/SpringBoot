@@ -1,0 +1,39 @@
+What is the difference between Stateful authentication (Session-based) and Stateless authentication (JWT)?
+Why do modern systems prefer JWT?**
+
+ANSWER:
+Stateful Authentication (Session-based)
+Server stores session data (user identity, roles, etc.)
+Client sends session ID (cookie) on each request
+Server uses that ID to fetch user info from memory / Redis / DB
+🔻 Problems
+Server must remember every logged-in user
+Difficult to scale horizontally
+Requires:
+Sticky sessions OR
+Centralized session store (Redis)
+Higher memory usage on server
+
+
+Stateless Authentication (JWT-based)
+Server does not store session
+JWT itself contains:
+user identity
+roles
+expiry
+Client sends JWT with every request
+Server only validates token, no lookup required
+
+
+🔥 Why Modern Systems Prefer JWT
+1️⃣ Horizontal Scalability
+Any server instance can validate JWT
+→ works perfectly behind a load balancer
+2️⃣ No Session Storage
+No server memory usage
+No Redis dependency just for auth
+3️⃣ Better for Microservices
+Same JWT works across services
+No shared session store needed
+4️⃣ Reduced Server Coupling
+Server doesn’t care who handled the previous request
