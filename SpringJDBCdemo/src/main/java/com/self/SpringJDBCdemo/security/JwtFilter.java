@@ -66,59 +66,105 @@ public class JwtFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         // Authorization: Bearer <token>
+        //Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJuaXRlc2giLCJpYXQiOjE3MTAwMDAwMDAsImV4cCI6MTcxMDAwMzYwMH0.Vp6y9H4kQnT5zRkL0wA1m8B9XyJp0Q
         String header = request.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {
 
-            String token = header.substring(7); // remove "Bearer " and store the token
-            String username = jwtUtil.extractUsername(token);   //extract username from token
+            // remove "Bearer " and store the token
+            // any space after "Authorization:" will be removed and only starting with "Bearer..." will be saved in the token
+            String token = header.substring(7);
 
-            /* if username and context is null, means this user is not authenticated before.
-            The check is NOT for: “Has this user already logged in before?”
-            The check IS for: “Has this request already been authenticated earlier in the filter chain?”
-            Imagine:
-                Multiple security filters
-                Or a request forwarded internally
-                Or filter chain executed twice
-                Without this check:
-                Authentication could be overwritten which will create Performance issue and Security bugs might occure
+            try {
+                // extract username from token
+                String username = jwtUtil.extractUsername(token);
+
+            /*
+             if username is present and SecurityContext is null, it means
+             THIS REQUEST has not been authenticated yet.
+
+             The check is NOT for:
+             "Has this user already logged in before?"
+
+             The check IS for:
+             "Has this request already been authenticated earlier in the filter chain?"
+
+             This is important in cases like:
+                - Multiple security filters
+                - Internal request forwarding
+                - Filter chain being executed more than once
+
+             Without this check:
+                - Authentication may be overwritten
+                - Performance issues
+                - Potential security bugs
              */
-            if (username != null &&
-                    SecurityContextHolder.getContext().getAuthentication() == null) {
+                if (username != null &&
+                        SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                // Load user from database
-                UserDetails userDetails =
-                        userDetailsService.loadUserByUsername(username);
+                    // Load user details from database
+                    UserDetails userDetails =
+                            userDetailsService.loadUserByUsername(username);
 
-                // Validate token (username match + expiration)
-                if (jwtUtil.validateToken(token, userDetails)) {
+                    // Validate token (username match + expiration + signature)
+                    boolean tokenValid = jwtUtil.validateToken(token, userDetails);
 
-                    // This constructor with authorities MARKS the user as authenticated
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities()
-                            );
+                    if (tokenValid) {
 
-                    // Store authentication in SecurityContext for this user, so that next time validation should be skipped
-                    SecurityContextHolder.getContext()
-                            .setAuthentication(authentication);
+                    /*
+                     This constructor with authorities MARKS the user
+                     as authenticated for THIS REQUEST.
+                     */
+                        UsernamePasswordAuthenticationToken authentication =
+                                new UsernamePasswordAuthenticationToken(
+                                        userDetails,
+                                        null,
+                                        userDetails.getAuthorities()
+                                );
+
+                    /*
+                     Store authentication in SecurityContext so that:
+                        - Controllers can access the authenticated user
+                        - @AuthenticationPrincipal works
+                        - Authorization checks can be performed
+
+                     NOTE:
+                     This authentication is valid ONLY for the current request.
+                     It will be cleared automatically once the request completes.
+                     */
+                        SecurityContextHolder.getContext()
+                                .setAuthentication(authentication);
+                    }
+
                 }
+
+            } catch (Exception e) {
+                // Token is invalid, expired, or malformed
+                response.sendError(
+                        HttpServletResponse.SC_UNAUTHORIZED,
+                        "Invalid or expired JWT token"
+                );
+                return;
             }
         }
 
-        /* It passes the same HTTP request and response to the next filter in the Spring Security Filter Chain (or to the controller if no filters remain).
-        Authentication is now available in SecurityContext
-        The request continues through remaining filters
-        Authorization checks can now be performed
-        If doFilter() is not called:
-            Request processing stops
-            Controller is never invoked
-            Client gets no response (or gets error)
-         */
+    /*
+     Passes the same HTTP request and response to the next filter
+     in the Spring Security Filter Chain (or to the controller if no filters remain).
+
+     At this point:
+        - Authentication (if valid) is available in SecurityContext
+        - Remaining security filters can perform authorization
+        - Controller method can be invoked
+
+     If doFilter() is NOT called:
+        - Request processing stops
+        - Controller is never invoked
+        - Client receives no valid response
+     */
         filterChain.doFilter(request, response);
     }
+
 
     /*
         This method decides WHETHER this filter should run for a request.
