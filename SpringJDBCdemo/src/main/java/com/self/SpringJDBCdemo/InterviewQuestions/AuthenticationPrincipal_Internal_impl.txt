@@ -1,0 +1,37 @@
+What happens internally when you use @AuthenticationPrincipal UserDetails userDetails in a controller method?
+ANSWER:
+
+1️⃣ During request processing, your JWT filter validates the token and sets authentication:
+SecurityContextHolder.getContext().setAuthentication(authentication);
+
+2️⃣ The Authentication object contains:
+principal → UserDetails
+authorities
+isAuthenticated = true
+
+3️⃣ Spring MVC has a HandlerMethodArgumentResolver that:
+Detects @AuthenticationPrincipal
+Fetches the Authentication object from SecurityContextHolder
+Extracts the principal
+Injects it into the controller method parameter
+UserDetails userDetails =
+   (UserDetails) SecurityContextHolder
+       .getContext()
+       .getAuthentication()
+       .getPrincipal();
+This is done automatically by Spring.
+
+🔥 Why this is useful (Real Reason)
+✔ Avoids extra DB calls
+✔ Gives authenticated user context instantly
+✔ Clean controller code
+✔ Works across all endpoints after authentication
+
+
+⚠ Important Interview Edge Case
+If:
+User is unauthenticated OR
+JWT is missing/invalid
+Then:
+@AuthenticationPrincipal UserDetails userDetails
+→ will be null
