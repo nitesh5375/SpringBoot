@@ -1,0 +1,46 @@
+✅ Difference Between @Controller and @RestController
+ANSWER:
+
+@Controller
+Used mainly for MVC / web applications
+Returns:
+View name (JSP / Thymeleaf)
+Needs @ResponseBody annotation if you want JSON
+
+Example:
+@Controller
+public class UserController {
+   @ResponseBody
+   @GetMapping("/user")
+   public User getUser() {
+       return new User();
+   }
+}
+
+
+@RestController
+Used for REST APIs
+Automatically converts return object to JSON
+No need for @ResponseBody annotation
+Equivalent to:
+@Controller
+@ResponseBody
+
+
+🔥 What Happens Internally in @RestController?
+1️⃣ Controller method returns an object
+return new OrderResponseDTO();
+2️⃣ Spring uses HttpMessageConverters
+Jackson (JSON) is one of them and default used by Spring
+Converts Java object → JSON
+3️⃣ Response is written to HttpServletResponse body
+Content-Type: application/json
+Status: 200 OK (default)
+4️⃣ DispatcherServlet sends response back
+Client receives JSON.
+🔍 Important Interview Detail
+If Jackson is not present in classpath:
+Spring cannot convert object → JSON
+You’ll get HTTP 500 error
+⭐ Quick Interview Summary Line (Memorize This)
+"@RestController automatically serializes the return object to JSON using HttpMessageConverters like Jackson, whereas @Controller is used for view-based MVC."
